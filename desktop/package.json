@@ -1,0 +1,87 @@
+{
+  "name": "revive-a-maker-desktop",
+  "productName": "Revive-A-Maker",
+  "version": "1.1.0",
+  "description": "Revive-A-Maker for Windows, Mac and Linux: Be a Maker, Jibo's Scratch companion, revived.",
+  "main": "main.js",
+  "author": "Jibo Revival Group <zane@jiborevival.com>",
+  "license": "BSD-3-Clause",
+  "homepage": "https://apps.5x1.com",
+  "scripts": {
+    "start": "electron .",
+    "check": "electron . --check",
+    "dist": "electron-builder --publish never"
+  },
+  "devDependencies": {
+    "electron": "^45.3.3",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.jiborevival.reviveamaker",
+    "productName": "Revive-A-Maker",
+    "files": [
+      "main.js",
+      "build/icon.png"
+    ],
+    "extraResources": [
+      {
+        "from": "../web",
+        "to": "ram/web",
+        "filter": [
+          "**/*",
+          "!data/**",
+          "!test/**"
+        ]
+      },
+      {
+        "from": "../web/node_modules",
+        "to": "ram/web/node_modules"
+      },
+      {
+        "from": "../assets",
+        "to": "ram/assets"
+      },
+      {
+        "from": "../res",
+        "to": "ram/res"
+      },
+      {
+        "from": "../splash.png",
+        "to": "ram/splash.png"
+      }
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "artifactName": "Revive-A-Maker-${version}-${os}-${arch}.${ext}",
+    "win": {
+      "target": [
+        "portable"
+      ]
+    },
+    "portable": {
+      "artifactName": "Revive-A-Maker-${version}-windows-portable.${ext}"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "zip",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "category": "public.app-category.education",
+      "identity": null
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Education"
+    },
+    "npmRebuild": false
+  },
+  "desktopName": "Revive-A-Maker.desktop"
+}

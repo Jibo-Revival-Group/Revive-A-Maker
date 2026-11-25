@@ -16,7 +16,8 @@ const PUBLIC = path.join(ROOT, 'public');
 const PLAYGROUND = path.join(REPO, 'assets', 'web', 'playground');
 const ASSETS = path.join(REPO, 'assets');
 const RES = path.join(REPO, 'res');
-const MEDIA = path.join(ROOT, 'data', 'media');
+// The desktop app keeps media in its user-data folder (the app folder is read-only there).
+const MEDIA = process.env.RAM_MEDIA || path.join(ROOT, 'data', 'media');
 
 fs.mkdirSync(MEDIA, { recursive: true });
 fs.mkdirSync(path.join(MEDIA, 'thumbs'), { recursive: true });
@@ -248,6 +249,7 @@ wss.on('connection', (ws) => {
   ws.on('close', off);
 });
 
-server.listen(PORT, '0.0.0.0', () => {
+// HOST: the desktop app serves this computer only; the phone apps keep the default.
+server.listen(PORT, process.env.HOST || '0.0.0.0', () => {
   console.log(`Revive-A-Maker web app: http://127.0.0.1:${PORT}`);
 });

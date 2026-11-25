@@ -77,9 +77,47 @@ jobs:
           name: Revive-A-Maker-iOS
           path: Revive-A-Maker-*.ipa
 
+  # Windows (portable .exe), Mac (.app, universal) and Linux (.AppImage): desktop/ runs web/server.js in Electron.
+  desktop:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund --omit=dev
+        working-directory: web
+      - run: npm ci --no-audit --no-fund
+        working-directory: desktop
+      - run: npx electron-builder --publish never
+        working-directory: desktop
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: The packaged app starts its server and shows the pairing page and the Scratch playground
+        shell: bash
+        working-directory: desktop/dist
+        run: |
+          case "$RUNNER_OS" in
+            Linux) ./*.AppImage --appimage-extract >/dev/null && xvfb-run -a squashfs-root/revive-a-maker-desktop --no-sandbox --check ;;
+            Windows) ./win-unpacked/Revive-A-Maker.exe --check | cat ;;
+            macOS) ditto -x -k *.zip "$RUNNER_TEMP/app" && "$RUNNER_TEMP/app/Revive-A-Maker.app/Contents/MacOS/Revive-A-Maker" --check ;;
+          esac
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Revive-A-Maker-desktop-${{ runner.os }}
+          path: |
+            desktop/dist/Revive-A-Maker-*.AppImage
+            desktop/dist/Revive-A-Maker-*.exe
+            desktop/dist/Revive-A-Maker-*.zip
+          if-no-files-found: error
+
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [web, android, ios]
+    needs: [web, android, ios, desktop]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
